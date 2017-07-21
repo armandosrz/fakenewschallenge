@@ -1,10 +1,10 @@
 import json, csv
 
-with open('polireddit-export.json', 'r') as _file:
+with open('polireddit-export_flair_time.json', 'r') as _file:
     data = json.loads(_file.read())
 
 def generate_submissions(data):
-    with open("submissions.csv", 'w') as sub:
+    with open("submissions_flair.csv", 'w') as sub:
         writer = csv.writer(sub)
         header = [
             'Submission',
@@ -18,7 +18,8 @@ def generate_submissions(data):
             'flair',
             'score',
             'link',
-            'created'
+            'created',
+            'flair_assigned'
         ]
         writer.writerow(header)
         for x in range(len(data['submissions'])):
@@ -34,7 +35,8 @@ def generate_submissions(data):
                 data['submissions'][x]['flair'],
                 data['submissions'][x]['score'],
                 data['submissions'][x]['link'],
-                data['submissions'][x]['created']
+                data['submissions'][x]['created'],
+                data['submissions'][x]['flair_assigned'] if 'flair_assigned' in data['submissions'][x] else None
             ]
             writer.writerow(values)
 
@@ -61,5 +63,5 @@ def generate_comments(data):
                     ]
                     writer.writerow(values)
 
-generate_comments(data)
+#generate_comments(data)
 generate_submissions(data)

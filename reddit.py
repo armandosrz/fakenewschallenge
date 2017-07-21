@@ -70,6 +70,12 @@ def update_downs():
 def save_submission_db():
     submissions = {}
     comments = {}
+    authors = [
+        'timothyjchambers',
+        'dirtyfries',
+        'nandryshak',
+        'FactCheckingMod',
+        'CaspianX2']
     total_comments = 0
     for num, sub in enumerate(_reddit.subreddit('politicalfactchecking').hot(limit=550)):
         temp_dict = default_inner()
@@ -94,13 +100,12 @@ def save_submission_db():
         temp_dict['link'] = ','.join(links) if links else ''
         #print (links)
         #print (temp_dict['link'] + '-')
-        submissions[num] = temp_dict
         sub.comments.replace_more(limit=0)
         y = 0
         comments[num] = {}
         links = []
         time = sub.created
-
+        temp_time = int(sub.created)
         for comment in sub.comments.list():
             total_comments += 1
             #print (vars(comment))
@@ -111,18 +116,20 @@ def save_submission_db():
             comments[num][str(y) + '_parent_id'] = comment.parent_id
             comments[num][str(y) + '_score'] = comment.score
             comments[num][str(y) + '_sub_id'] = sub.id
-
+            if comment.author in authors:
+                temp_time = int(comment.created) if int(comment.created) > temp_time else temp_time
             links.extend(get_links(comments[num][y]))
             print ('working on {}-{}'.format(num, y))
             y += 1
             time = time +  (comment.created -time) /2
-
+        if temp_time != int(sub.created) and str(sub.link_flair_text) != 'None':
+            temp_dict['flair_assigned'] = str(datetime.datetime.fromtimestamp(temp_time))
+        submissions[num] = temp_dict
         comments[num]['link'] = ','.join(links) if links else ''
         comments[num]['created'] = str(datetime.datetime.fromtimestamp(time))
-        print ('Comments: {}'.format(total_comments))
 
-    #db.child('submissions').set(submissions, _userId)
-    db.child('comments').set(comments, _userId)
+    db.child('submissions').set(submissions, _userId)
+    #db.child('comments').set(comments, _userId)
 
 
 #update_downs()
